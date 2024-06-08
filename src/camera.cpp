@@ -2,20 +2,29 @@
 #include <iostream>
 
 #include "camera.h"
+#include "ui.h"
 
 Camera::Camera() {
+	// Sets forward/up/right vectors based on initial yaw/pitch
 	updateVectors();
+
+	UIInputs& uiInputs = UI::getInputs();
+	uiInputs.cameraPosition = &position;
+	uiInputs.cameraForward = &forward;
 }
 
 void Camera::startMove(CameraDirection direction) {
+	if (!movementEnabled) return;
 	movementKeys[(int) direction] = true;
 }
 
 void Camera::endMove(CameraDirection direction) {
+	if (!movementEnabled) return;
 	movementKeys[(int) direction] = false;
 }
 
 void Camera::moveMouse(glm::vec2 newPosition) {
+	if (!movementEnabled) return;
 	if (mouseJustEntered) {
 		prevMousePosition = newPosition;
 		mouseJustEntered = false;
@@ -41,6 +50,8 @@ void Camera::mouseExit(int exitedWindow) {
 }
 
 void Camera::frameUpdate(float elapsedTime) {
+	if (!movementEnabled) return;
+
 	glm::vec3 direction = glm::vec3(0.0f);
 	if (movementKeys[(int) CAMERA_UP]) direction += up;
 	if (movementKeys[(int) CAMERA_DOWN]) direction -= up;
@@ -58,6 +69,10 @@ glm::mat4 Camera::getViewMatrix() {
 	return glm::lookAt(position, position + forward, up);
 }
 
+glm::mat4 Camera::getProjectionMatrix(float aspectRatio) {
+	return glm::perspective(glm::radians(fieldOfView), aspectRatio, nearClipPlane, farClipPlane);
+}
+
 void Camera::updateVectors() {
 	forward = glm::normalize(glm::vec3(
 		cos(glm::radians(yaw)) * cos(glm::radians(pitch)),
@@ -66,4 +81,9 @@ void Camera::updateVectors() {
 	));
 	right = glm::normalize(glm::cross(forward, worldUp));
 	up = glm::normalize(glm::cross(right, forward));
+}
+
+void Camera::setMovementEnabled(bool enabled) {
+	movementEnabled = enabled;
+	mouseJustEntered = true;
 }

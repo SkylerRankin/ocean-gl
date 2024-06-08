@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
@@ -9,18 +8,21 @@
 
 #include "engine.h"
 #include "shader.h"
+#include <imgui.h>
 
 static Engine engine;
 
 static void errorCallback(int error, const char* description) {
-    printf("GLFW error (%d): %s\n", error, description);
+    std::cout << "GLFW error (" << error << "): " << description << std::endl;
 }
 
 static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (key != GLFW_KEY_ESCAPE && ImGui::GetIO().WantCaptureKeyboard) return;
     engine.keyCallback(key, scancode, action, mods);
 }
 
 static void mousePositionCallback(GLFWwindow* window, double x, double y) {
+    if (ImGui::GetIO().WantCaptureMouse) return;
     engine.mousePositionCallback(x, y);
 }
 
@@ -30,11 +32,11 @@ static void mouseEnteredCallback(GLFWwindow* window, int entered) {
 
 int main(void) {
     if (!glfwInit()) {
-        printf("Failed to initialize GLFW.\n");
+        std::cout << "Failed to initialize GLFW" << std::endl;
         return -1;
     }
 
-    GLFWwindow *window = glfwCreateWindow(640, 480, "ocean-gl", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(1000, 600, "ocean-gl", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -48,15 +50,13 @@ int main(void) {
     glfwSetCursorEnterCallback(window, &mouseEnteredCallback);
     gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
 
+    const GLubyte* version = glGetString(GL_VERSION);
+    std::cout << "OpenGL version: " << version << std::endl;
+
     engine.setup(window);
 
-    double prevFrameTime = glfwGetTime();
     while (!glfwWindowShouldClose(window)) {
-        double currentTime = glfwGetTime();
-        engine.elapsedTime = currentTime - prevFrameTime;
-        engine.handleInputs();
-        engine.renderFrame();
-        prevFrameTime = currentTime;
+        engine.update();
     }
 
     glfwTerminate();

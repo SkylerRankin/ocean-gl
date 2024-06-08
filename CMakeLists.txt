@@ -23,18 +23,27 @@ set(GLAD_SOURCES lib/glad/src/glad.c)
 include_directories(lib/glm-1.0.1/glm)
 add_subdirectory(lib/glm-1.0.1)
 
+# Dear IMGUI
+include_directories(lib/imgui-1.90.8)
+include_directories(lib/imgui-1.90.8/backends)
+file(GLOB_RECURSE IMGUI_SOURCES lib/imgui-1.90.8/*.cpp)
+add_library(IMGUI STATIC ${IMGUI_SOURCES})
+target_include_directories(IMGUI PUBLIC /lib/imgui-1.90.8)
+
 # List source files, header files, and shader files
 set(CXX_SOURCES
     src/main.cpp
     src/engine.cpp
     src/shader.cpp
     src/camera.cpp
+    src/ui.cpp
     ${GLAD_SOURCES})
 
 set(CXX_HEADERS
     src/engine.h
     src/shader.h
-    src/camera.h)
+    src/camera.h
+    src/ui.h)
 set_source_files_properties(${CXX_HEADERS} PROPERTIES HEADER_FILE_ONLY true)
 
 set(SHADER_SOURCES
@@ -67,6 +76,7 @@ if (${WIN32} AND ${HIDE_COMMAND_WINDOW})
     set_target_properties(${TARGET} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:WINDOWS")
 endif()
 
-target_compile_options(${TARGET} PUBLIC -Wall)
+# target_compile_options(${TARGET} PUBLIC -Wall)
 target_link_libraries(${TARGET} glfw)
 target_link_libraries(${TARGET} glm::glm)
+target_link_libraries(${TARGET} IMGUI)

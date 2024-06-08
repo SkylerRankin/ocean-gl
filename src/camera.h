@@ -13,8 +13,11 @@ enum CameraDirection {
 
 class Camera {
 private:
-	const float mouseSensitivity = 1.0f;
+	const float mouseSensitivity = 0.1f;
 	const float speed = 5.0f;
+	const float fieldOfView = 45.0f;
+	const float nearClipPlane = 0.1f;
+	const float farClipPlane = 100.0f;
 	float yaw = -90.0f;
 	float pitch = 0.0f;
 	const glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -25,6 +28,7 @@ private:
 	glm::vec2 prevMousePosition;
 	bool mouseJustEntered = true;
 	bool movementKeys[6];
+    bool movementEnabled = true;
 
 public:
 	Camera();
@@ -33,7 +37,9 @@ public:
 	void moveMouse(glm::vec2 newPosition);
 	void mouseExit(int exitedWindow);
 	void frameUpdate(float elapsedTime);
+    void setMovementEnabled(bool enabled);
 	glm::mat4 getViewMatrix();
+	glm::mat4 getProjectionMatrix(float aspectRatio);
 private:
 	void updateVectors();
 

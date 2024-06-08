@@ -4,11 +4,10 @@
 
 #include "engine.h"
 #include "shader.h"
+#include "ui.h"
 
 void Engine::setup(GLFWwindow* window) {
     this->window = window;
-    const GLubyte* version = glGetString(GL_VERSION);
-    printf("OpenGL version: %s\n", version);
 
     float vertexData[] = {
         -0.5, -0.5, 0.5,
@@ -35,11 +34,17 @@ void Engine::setup(GLFWwindow* window) {
 
     glClearColor(0.0f, 0.3f, 0.3f, 0.0f);
 
-    const float fov = 45.0f;
-    const float screenWidth = 640;
-    const float screenHeight = 480;
-    glm::mat4 projectionMatrix = glm::perspective(glm::radians(fov), screenWidth / screenHeight, 0.1f, 100.0f);
-    vertexShader.setUniformMat4("projection", projectionMatrix);
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    windowResizeCallback(width, height);
+
+    UI::init(window);
+
+    // Set pointers to UI values
+    UIInputs& uiInputs = UI::getInputs();
+    uiInputs.frameTime = &frameTimeAverage;
+
+    lastFrameTime = glfwGetTime();
 }
 
 void Engine::keyCallback(int key, int scancode, int action, int mods) {
@@ -96,6 +101,19 @@ void Engine::keyCallback(int key, int scancode, int action, int mods) {
             camera.endMove(CAMERA_UP);
         }
         break;
+    case GLFW_KEY_ESCAPE:
+        if (action == GLFW_PRESS) {
+            if (cameraFocus) {
+                UI::enableFocus();
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            } else {
+                UI::removeFocus();
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            }
+            cameraFocus = !cameraFocus;
+            camera.setMovementEnabled(cameraFocus);
+        }
+        break;
     }
 
 }
@@ -108,16 +126,43 @@ void Engine::mouseEnteredCallback(int entered) {
     camera.mouseExit(~entered);
 }
 
+void Engine::windowResizeCallback(int width, int height) {
+    windowSize = glm::ivec2(width, height);
+    glViewport(0, 0, width, height);
+    vertexShader.setUniformMat4("projection", camera.getProjectionMatrix(windowSize.x / (float) windowSize.y));
+}
+
+void Engine::update() {
+    float currentTime = glfwGetTime();
+    float elapsedTime = currentTime - lastFrameTime;
+
+    frameTimeAverage = frameTimeAverageDecay * frameTimeAverage + (1.0f - frameTimeAverageDecay) * elapsedTime;
+
+    handleInputs(elapsedTime);
+    renderFrame();
+    
+    lastFrameTime = currentTime;
+}
+
 void Engine::renderFrame() {
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    if (windowSize.x != width || windowSize.y != height) {
+        windowResizeCallback(width, height);
+    }
+
+    UI::setupFrame();
+
     glClear(GL_COLOR_BUFFER_BIT);
 
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
+    UI::renderFrame();
     glfwSwapBuffers(window);
 }
 
-void Engine::handleInputs() {
+void Engine::handleInputs(float elapsedTime) {
     glfwPollEvents();
     camera.frameUpdate(elapsedTime);
     vertexShader.setUniformMat4("view", camera.getViewMatrix());
