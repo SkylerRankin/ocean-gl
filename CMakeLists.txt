@@ -40,6 +40,7 @@ set(CXX_SOURCES
     ${GLAD_SOURCES})
 
 set(CXX_HEADERS
+    src/glCommon.h
     src/engine.h
     src/shader.h
     src/camera.h

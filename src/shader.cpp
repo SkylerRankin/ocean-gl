@@ -71,6 +71,21 @@ void Shader::compileAndAttach(GLuint program, GLenum shaderType, const std::stri
     glAttachShader(program, id);
 }
 
+void Shader::setUniformFloat(const std::string & name, float value) {
+    if (!attributeLocations.contains(name)) {
+        attributeLocations.emplace(name, glGetUniformLocation(program, name.c_str()));
+    }
+    glUniform1f(attributeLocations.at(name), value);
+}
+
+void Shader::setUniformVec3(const std::string& name, glm::vec3 value) {
+    if (!attributeLocations.contains(name)) {
+        attributeLocations.emplace(name, glGetUniformLocation(program, name.c_str()));
+    }
+    glm::value_ptr(value);
+    glUniform3f(attributeLocations.at(name), value.x, value.y, value.z);
+}
+
 void Shader::setUniformMat4(const std::string& name, glm::mat4 mat) {
     if (!attributeLocations.contains(name)) {
         attributeLocations.emplace(name, glGetUniformLocation(program, name.c_str()));

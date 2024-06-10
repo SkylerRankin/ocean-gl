@@ -1,8 +1,9 @@
 #pragma once
 #include <string>
-#include <glad/glad.h>
 #include <glm/mat4x4.hpp>
 #include <map>
+
+#include "glCommon.h"
 
 class Shader {
 public:
@@ -15,6 +16,8 @@ private:
 public:
 	Shader();
 	void compileAndAttach(GLuint program, GLenum shaderType, const std::string& filename);
+	void setUniformFloat(const std::string& name, float value);
+	void setUniformVec3(const std::string& name, glm::vec3 value);
 	void setUniformMat4(const std::string& name, glm::mat4 mat);
 private:
 	void setExecutableDirectory();

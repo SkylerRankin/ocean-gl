@@ -3,9 +3,8 @@
 #include <filesystem>
 #include <windows.h>
 #include <libloaderapi.h>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 
+#include "glCommon.h"
 #include "engine.h"
 #include "shader.h"
 #include <imgui.h>
