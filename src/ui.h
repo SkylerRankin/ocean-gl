@@ -16,14 +16,15 @@ typedef struct {
 namespace UI {
 	typedef struct {
 		bool hasPendingUpdate;
-		int lastValue;
+		float lastValue;
 	} SliderState;
 
 	typedef struct {
 		Engine* engine;
 		ImGuiWindowFlags windowFlags;
 
-		SliderState waterSizeSliderState;
+		SliderState waterMeshSizeSlider;
+		SliderState waterMeshResolutionSlider;
 	} UIState;
 
 	void init(GLFWwindow* window, Engine* engine);

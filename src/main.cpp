@@ -35,7 +35,7 @@ int main(void) {
         return -1;
     }
 
-    GLFWwindow *window = glfwCreateWindow(1000, 600, "ocean-gl", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(1400, 800, "ocean-gl", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;

@@ -33,8 +33,14 @@ private:
 	Shader waterFragmentShader;
 	GLuint waterShaderProgram;
 
-	// Number of quads in the water mesh
-	glm::ivec2 waterMeshSize = glm::ivec2(50, 50);
+	// Water controls
+	const int waveCount = 20;
+	int totalQuads;
+	// Length of side of square of water mesh
+	int waterMeshSize = 400;
+	float waterMeshResolution = 0.5f;
+	float waveParameters[4 * 20];
+	bool hasWaveParameterUpdate = false;
 
 	glm::ivec2 windowSize;
 	glm::vec2 previousMousePosition = glm::vec2(0);
@@ -49,8 +55,13 @@ public:
 	void keyCallback(int key, int scancode, int action, int mods);
 	void mousePositionCallback(double x, double y);
 	void mouseEnteredCallback(int entered);
+	void setupWaveParameters();
 	int getWaterMeshSize();
+	float getWaterMeshResolution();
+	float* getWaveParameters();
 	void updateWaterMeshSize(int size);
+	void updateWaterMeshResolution(float resolution);
+	void updateWaterParameter(int index, float value);
 
 private:
 	void renderFrame();

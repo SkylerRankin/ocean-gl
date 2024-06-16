@@ -78,6 +78,13 @@ void Shader::setUniformFloat(const std::string & name, float value) {
     glUniform1f(attributeLocations.at(name), value);
 }
 
+void Shader::setUniformFloatv(const std::string& name, int count, float* values) {
+    if (!attributeLocations.contains(name)) {
+        attributeLocations.emplace(name, glGetUniformLocation(program, name.c_str()));
+    }
+    glUniform1fv(attributeLocations.at(name), count, values);
+}
+
 void Shader::setUniformVec3(const std::string& name, glm::vec3 value) {
     if (!attributeLocations.contains(name)) {
         attributeLocations.emplace(name, glGetUniformLocation(program, name.c_str()));

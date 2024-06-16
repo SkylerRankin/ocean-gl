@@ -17,6 +17,7 @@ public:
 	Shader();
 	void compileAndAttach(GLuint program, GLenum shaderType, const std::string& filename);
 	void setUniformFloat(const std::string& name, float value);
+	void setUniformFloatv(const std::string& name, int count, float *values);
 	void setUniformVec3(const std::string& name, glm::vec3 value);
 	void setUniformMat4(const std::string& name, glm::mat4 mat);
 private:
