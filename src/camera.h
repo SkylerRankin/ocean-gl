@@ -16,10 +16,10 @@ public:
 	glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
 private:
 	const float mouseSensitivity = 0.1f;
-	const float speed = 100.0f;
+	const float speed = 300.0f;
 	const float fieldOfView = 45.0f;
 	const float nearClipPlane = 0.1f;
-	const float farClipPlane = 1000.0f;
+	const float farClipPlane = 10000.0f;
 	float yaw = -90.0f;
 	float pitch = 0.0f;
 	const glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f);

@@ -13,16 +13,44 @@ void Water::init(Engine* engine, GLuint skyboxTexture) {
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-    updateVBO();
+    // 4 vertices per patch to form quads
+    glPatchParameteri(GL_PATCH_VERTICES, 4);
+    std::vector<float> vertices;
+    const glm::vec2 centerOffset = patchSize * patchTileSize / 2.0f;
+
+    for (int x = 0; x < patchTileSize.x; x++) {
+        for (int y = 0; y < patchTileSize.y; y++) {
+            vertices.push_back(patchSize.x * x - centerOffset.x);
+            vertices.push_back(0);
+            vertices.push_back(patchSize.y * y - centerOffset.y);
+
+            vertices.push_back(patchSize.x * (x + 1) - centerOffset.x);
+            vertices.push_back(0);
+            vertices.push_back(patchSize.y * y - centerOffset.y);
+
+            vertices.push_back(patchSize.x * x - centerOffset.x);
+            vertices.push_back(0);
+            vertices.push_back(patchSize.y * (y + 1) - centerOffset.y);
+
+            vertices.push_back(patchSize.x * (x + 1) - centerOffset.x);
+            vertices.push_back(0);
+            vertices.push_back(patchSize.y * (y + 1) - centerOffset.y);
+        }
+    }
+
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
     program = glCreateProgram();
     vertexShader.compileAndAttach(program, GL_VERTEX_SHADER, "water_vertex.glsl");
+    tessControlShader.compileAndAttach(program, GL_TESS_CONTROL_SHADER, "water_tess_control.glsl");
+    tessEvalShader.compileAndAttach(program, GL_TESS_EVALUATION_SHADER, "water_tess_eval.glsl");
     fragmentShader.compileAndAttach(program, GL_FRAGMENT_SHADER, "water_fragment.glsl");
     glLinkProgram(program);
     glUseProgram(program);
 
     setWaveParameters();
     vertexShader.setUniformFloatv("waves", 80, waveParameters);
+    tessEvalShader.setUniformFloatv("waves", 80, waveParameters);
 
     GLuint vertexPositionLocation = glGetAttribLocation(program, "vertexPosition");
     glEnableVertexAttribArray(vertexPositionLocation);
@@ -34,43 +62,29 @@ void Water::render() {
     glUseProgram(program);
 
     vertexShader.setUniformFloat("time", (float)glfwGetTime());
+    tessEvalShader.setUniformFloat("time", (float)glfwGetTime());
     fragmentShader.setUniformVec3("cameraPosition", engine->camera.position);
     vertexShader.setUniformFloatv("waves", 40, waveParameters);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glDrawArrays(GL_TRIANGLES, 0, totalQuads * VERTICES_PER_QUAD);
+    glBindVertexArray(vao);
+    glDrawArrays(GL_PATCHES, 0, 4 * patchTileSize.x * patchTileSize.y);
+
+    // Renders wireframe
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glDrawArrays(GL_PATCHES, 0, 4 * patchTileSize.x * patchTileSize.y);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void Water::setViewMatrix(glm::mat4 view) {
     glUseProgram(program);
     vertexShader.setUniformMat4("view", view);
+    tessEvalShader.setUniformMat4("view", view);
 }
 
 void Water::setProjectionMatrix(glm::mat4 projection) {
     glUseProgram(program);
     vertexShader.setUniformMat4("projection", projection);
-}
-
-void Water::updateVBO() {
-    const int sideQuadCount = waterMeshSize / waterMeshResolution;
-    totalQuads = sideQuadCount * sideQuadCount;
-
-    glm::vec2 centerOffset = glm::vec2(waterMeshSize) / 2.0f;
-    int waterVertexCount = totalQuads * VERTICES_PER_QUAD;
-    std::vector<float> waterPlaneVertices(waterVertexCount * 3, 0.0f);
-    int bufferIndex = 0;
-    for (int x = 0; x < sideQuadCount; x++) {
-        for (int z = 0; z < sideQuadCount; z++) {
-            for (int i = 0; i < 18; i += 3) {
-                waterPlaneVertices.at(bufferIndex++) = (QUAD_VERTEX_POSITIONS[i + 0] + x) * waterMeshResolution - centerOffset.x;
-                waterPlaneVertices.at(bufferIndex++) = (QUAD_VERTEX_POSITIONS[i + 1]);
-                waterPlaneVertices.at(bufferIndex++) = (QUAD_VERTEX_POSITIONS[i + 2] + z) * waterMeshResolution - centerOffset.y;
-            }
-        }
-    }
-
-    std::cout << "Vertex buffer size: " << waterPlaneVertices.size() << std::endl;
-    glBufferData(GL_ARRAY_BUFFER, waterPlaneVertices.size() * sizeof(float), waterPlaneVertices.data(), GL_STATIC_DRAW);
+    tessEvalShader.setUniformMat4("projection", projection);
 }
 
 void Water::setWaveParameters() {

@@ -22,13 +22,16 @@ private:
 	GLuint vbo;
 	GLuint skyboxTexture;
 	GLuint program;
+
 	Shader vertexShader;
+	Shader tessControlShader;
+	Shader tessEvalShader;
 	Shader fragmentShader;
 
+	glm::vec2 patchTileSize = glm::vec2(100, 100);
+	glm::vec2 patchSize = glm::vec2(100, 100);
+
 	const int waveCount = 20;
-	int totalQuads;
-	int waterMeshSize = 1000;
-	float waterMeshResolution = 0.5f;
 	float waveParameters[4 * 20];
 
 public:
@@ -37,6 +40,5 @@ public:
 	void setViewMatrix(glm::mat4 view);
 	void setProjectionMatrix(glm::mat4 projection);
 private:
-	void updateVBO();
 	void setWaveParameters();
 };

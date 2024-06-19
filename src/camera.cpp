@@ -53,8 +53,8 @@ void Camera::frameUpdate(float elapsedTime) {
 	if (!movementEnabled) return;
 
 	glm::vec3 direction = glm::vec3(0.0f);
-	if (movementKeys[(int) CAMERA_UP]) direction += up;
-	if (movementKeys[(int) CAMERA_DOWN]) direction -= up;
+	if (movementKeys[(int) CAMERA_UP]) direction += worldUp;
+	if (movementKeys[(int) CAMERA_DOWN]) direction -= worldUp;
 	if (movementKeys[(int) CAMERA_RIGHT]) direction += right;
 	if (movementKeys[(int) CAMERA_LEFT]) direction -= right;
 	if (movementKeys[(int) CAMERA_FORWARD]) direction += forward;

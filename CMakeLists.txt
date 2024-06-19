@@ -58,7 +58,9 @@ set(SHADER_SOURCES
     src/shaders/cubemap_fragment.glsl
     src/shaders/cubemap_vertex.glsl
     src/shaders/water_fragment.glsl
-    src/shaders/water_vertex.glsl)
+    src/shaders/water_vertex.glsl
+    src/shaders/water_tess_control.glsl
+    src/shaders/water_tess_eval.glsl)
 set_source_files_properties(${SHADER_SOURCES} PROPERTIES HEADER_FILE_ONLY true)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${CXX_SOURCES} ${CXX_HEADERS} ${SHADER_SOURCES})
