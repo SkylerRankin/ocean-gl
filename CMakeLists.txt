@@ -30,6 +30,9 @@ file(GLOB_RECURSE IMGUI_SOURCES lib/imgui-1.90.8/*.cpp)
 add_library(IMGUI STATIC ${IMGUI_SOURCES})
 target_include_directories(IMGUI PUBLIC /lib/imgui-1.90.8)
 
+# stb_image
+include_directories(lib/stb_image)
+
 # List source files, header files, and shader files
 set(CXX_SOURCES
     src/main.cpp
@@ -37,6 +40,8 @@ set(CXX_SOURCES
     src/shader.cpp
     src/camera.cpp
     src/ui.cpp
+    src/cubemap.cpp
+    src/water.cpp
     ${GLAD_SOURCES})
 
 set(CXX_HEADERS
@@ -44,12 +49,16 @@ set(CXX_HEADERS
     src/engine.h
     src/shader.h
     src/camera.h
-    src/ui.h)
+    src/ui.h
+    src/cubemap.h
+    src/water.h)
 set_source_files_properties(${CXX_HEADERS} PROPERTIES HEADER_FILE_ONLY true)
 
 set(SHADER_SOURCES
-    src/shaders/fragment.glsl
-    src/shaders/vertex.glsl)
+    src/shaders/cubemap_fragment.glsl
+    src/shaders/cubemap_vertex.glsl
+    src/shaders/water_fragment.glsl
+    src/shaders/water_vertex.glsl)
 set_source_files_properties(${SHADER_SOURCES} PROPERTIES HEADER_FILE_ONLY true)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${CXX_SOURCES} ${CXX_HEADERS} ${SHADER_SOURCES})
@@ -61,14 +70,20 @@ set(PROJECT_BINARY_SUBDIR "")
 if (MSVC)
     set(PROJECT_BINARY_SUBDIR /$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>)
 endif()
-add_custom_target(copy_resources ALL
+add_custom_target(copy_shaders ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${PROJECT_SOURCE_DIR}/src/shaders
     ${PROJECT_BINARY_DIR}${PROJECT_BINARY_SUBDIR}/shaders
+    COMMENT "Copying shader directory into build directory")
+add_custom_target(copy_resources ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${PROJECT_SOURCE_DIR}/res
+    ${PROJECT_BINARY_DIR}${PROJECT_BINARY_SUBDIR}/res
     COMMENT "Copying resources directory into build directory")
 
 add_executable(${TARGET} ${CXX_SOURCES} ${CXX_HEADERS} ${GLAD_SOURCES})
 target_sources(${TARGET} PRIVATE ${SHADER_SOURCES})
+add_dependencies(${TARGET} copy_shaders)
 add_dependencies(${TARGET} copy_resources)
 
 # Controls if a command prompt window is opened when running the executable on Windows.

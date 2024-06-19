@@ -55,7 +55,7 @@ int main(void) {
     engine.setup(window);
 
     while (!glfwWindowShouldClose(window)) {
-        engine.update();
+        engine.renderFrame();
     }
 
     glfwTerminate();

@@ -13,7 +13,7 @@ enum CameraDirection {
 
 class Camera {
 public:
-	glm::vec3 position = glm::vec3(0.0f, 3.0f, 50.0f);
+	glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
 private:
 	const float mouseSensitivity = 0.1f;
 	const float speed = 100.0f;
