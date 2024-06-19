@@ -42,5 +42,10 @@ void main() {
 
     color = mix(color, skyReflectionColor, fresnel);
 
+    float maxFogDistance = 4000;
+    float cameraDistance = min(distance(cameraPosition, fragmentPosition), maxFogDistance);
+    float fogFactor = pow((cameraDistance / maxFogDistance), 3);
+    color = mix(color, vec3(1), fogFactor);
+
     outColor = vec4(color, 1.0);
 };
