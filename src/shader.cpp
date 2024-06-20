@@ -9,30 +9,14 @@
 #include "shader.h"
 
 
-std::string Shader::executableDirectory;
+extern std::string executableDirectory;
 
 Shader::Shader() : id(-1), program(-1) {}
 
-void Shader::setExecutableDirectory() {
-    if (Shader::executableDirectory.empty()) {
-        WCHAR executableDirectory[MAX_PATH];
-        GetModuleFileNameW(NULL, executableDirectory, MAX_PATH);
-        unsigned int i = MAX_PATH - 1;
-        while (executableDirectory[i] != '\\') {
-            executableDirectory[i--] = 0;
-        }
-
-        std::wstring wideString{ executableDirectory, i };
-        Shader::executableDirectory = std::string(wideString.begin(), wideString.end());
-    }
-}
-
 void Shader::compileAndAttach(GLuint program, GLenum shaderType, const std::string& filename) {
-    setExecutableDirectory();
-
     this->program = program;
     std::filesystem::path path;
-    path.append(Shader::executableDirectory);
+    path.append(executableDirectory);
     path.append("shaders");
     path.append(filename);
 

@@ -4,6 +4,7 @@
 #include "camera.h"
 #include "cubemap.h"
 #include "water.h"
+#include "object.h"
 
 
 class Engine {
@@ -14,6 +15,7 @@ private:
 
 	Water water;
 	Cubemap cubemap;
+	Object testObject;
 
 	bool hasWaveParameterUpdate = false;
 

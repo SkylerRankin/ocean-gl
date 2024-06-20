@@ -10,7 +10,6 @@ public:
 	GLuint id;
 private:
 	GLuint program;
-	static std::string executableDirectory;
 	std::map<std::string, GLint> attributeLocations;
 	
 public:
@@ -21,6 +20,5 @@ public:
 	void setUniformVec3(const std::string& name, glm::vec3 value);
 	void setUniformMat4(const std::string& name, glm::mat4 mat);
 private:
-	void setExecutableDirectory();
 	void compile(GLenum shaderType, const std::string& filename);
 };

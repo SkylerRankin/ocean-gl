@@ -10,6 +10,7 @@
 #include <imgui.h>
 
 static Engine engine;
+std::string executableDirectory;
 
 static void errorCallback(int error, const char* description) {
     std::cout << "GLFW error (" << error << "): " << description << std::endl;
@@ -54,6 +55,17 @@ int main(void) {
 
     const GLubyte* version = glGetString(GL_VERSION);
     std::cout << "OpenGL version: " << version << std::endl;
+
+    WCHAR wideExecutableDirectory[MAX_PATH];
+    GetModuleFileNameW(NULL, wideExecutableDirectory, MAX_PATH);
+    unsigned int endIndex = MAX_PATH - 1;
+    while (wideExecutableDirectory[endIndex] != '\\') {
+        wideExecutableDirectory[endIndex--] = 0;
+    }
+
+    std::wstring wideString{ wideExecutableDirectory, endIndex };
+    executableDirectory = std::string(wideString.begin(), wideString.end());
+    std::cout << "Executable directory: " << executableDirectory << std::endl;
 
     engine.setup(window);
 

@@ -42,6 +42,8 @@ set(CXX_SOURCES
     src/ui.cpp
     src/cubemap.cpp
     src/water.cpp
+    src/loader.cpp
+    src/object.cpp
     ${GLAD_SOURCES})
 
 set(CXX_HEADERS
@@ -51,7 +53,9 @@ set(CXX_HEADERS
     src/camera.h
     src/ui.h
     src/cubemap.h
-    src/water.h)
+    src/water.h
+    src/loader.h
+    src/object.h)
 set_source_files_properties(${CXX_HEADERS} PROPERTIES HEADER_FILE_ONLY true)
 
 set(SHADER_SOURCES
@@ -60,7 +64,9 @@ set(SHADER_SOURCES
     src/shaders/water_fragment.glsl
     src/shaders/water_vertex.glsl
     src/shaders/water_tess_control.glsl
-    src/shaders/water_tess_eval.glsl)
+    src/shaders/water_tess_eval.glsl
+    src/shaders/object_passthrough_fragment.glsl
+    src/shaders/object_passthrough_vertex.glsl)
 set_source_files_properties(${SHADER_SOURCES} PROPERTIES HEADER_FILE_ONLY true)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${CXX_SOURCES} ${CXX_HEADERS} ${SHADER_SOURCES})

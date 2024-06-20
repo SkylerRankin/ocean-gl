@@ -7,6 +7,8 @@
 
 #include "cubemap.h"
 
+extern std::string executableDirectory;
+
 void Cubemap::init() {
     std::vector<std::string> images = {
         "res/cubemap/4.png",
@@ -16,16 +18,6 @@ void Cubemap::init() {
         "res/cubemap/3.png",
         "res/cubemap/5.png"
     };
-
-    WCHAR executableDirectoryBuffer[MAX_PATH];
-    GetModuleFileNameW(NULL, executableDirectoryBuffer, MAX_PATH);
-    unsigned int endIndex = MAX_PATH - 1;
-    while (executableDirectoryBuffer[endIndex] != '\\') {
-        executableDirectoryBuffer[endIndex--] = 0;
-    }
-
-    std::wstring wideString{ executableDirectoryBuffer, endIndex };
-    std::string executableDirectory = std::string(wideString.begin(), wideString.end());
 
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);

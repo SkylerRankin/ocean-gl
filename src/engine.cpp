@@ -8,6 +8,7 @@
 #include "engine.h"
 #include "shader.h"
 #include "ui.h"
+#include "loader.h"
 
 
 void Engine::setup(GLFWwindow* window) {
@@ -15,6 +16,7 @@ void Engine::setup(GLFWwindow* window) {
 
     cubemap.init();
     water.init(this, cubemap.texture);
+    testObject.loadOBJ("untitled");
 
     glClearColor(0.0f, 0.3f, 0.3f, 0.0f);
     glEnable(GL_DEPTH_TEST);
@@ -140,6 +142,11 @@ void Engine::renderFrame() {
     UI::setupFrame();
     cubemap.render();
     water.render();
+    testObject.render(
+        camera.getViewMatrix(),
+        camera.getProjectionMatrix(windowSize.x / (float)windowSize.y),
+        (float) glfwGetTime()
+    );
     UI::renderFrame();
     glfwSwapBuffers(window);
     
