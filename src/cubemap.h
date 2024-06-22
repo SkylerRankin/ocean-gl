@@ -61,7 +61,7 @@ private:
 
 public:
 	void init();
-    void render();
+    void render(bool cameraUnderwater);
     void setViewMatrix(glm::mat4 view);
     void setProjectionMatrix(glm::mat4 projection);
 };

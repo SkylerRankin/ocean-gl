@@ -102,7 +102,7 @@ void parseLine(std::vector<std::string>& lineItems, OBJ::File& objFile) {
     } else if (first.compare("s") == 0) {
         // Smooth shading
         bool smoothShadingEnabled = lineItems.at(1).compare("off") != 0;
-        std::cout << "Smooth shading enabled = " << smoothShadingEnabled << std::endl;
+        // TODO handle smooth shading
     } else if (first.compare("o") == 0) {
         // Object name
         state.currentObjectName = lineItems.at(1);
@@ -139,8 +139,6 @@ void OBJ::parseOBJ(std::string objFilename, OBJ::File& objFile) {
     inputStream.seekg(0, inputStream.beg);
     std::vector<char> buffer(size);
     inputStream.read(buffer.data(), size);
-
-    std::cout << "Loaded " << size << " bytes." << std::endl;
 
     state.currentObjectName = "default";
 

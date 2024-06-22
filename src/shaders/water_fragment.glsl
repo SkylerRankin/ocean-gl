@@ -3,6 +3,7 @@
 in vec3 normal;
 in vec3 fragmentPosition;
 out vec4 outColor;
+uniform int underwaterFlag;
 uniform vec3 cameraPosition;
 uniform samplerCube cubemap;
 
@@ -10,6 +11,9 @@ vec3 lightPosition = vec3(6.0, 10.0, -10.0);
 vec3 baseColor = vec3(0.1, 0.5, 0.7);
 float ambient = 0.7;
 float specularStrength = 0.3;
+
+float fogDistances[2] = float[2](4000, 1000);
+float fogFactorMinimums[2] = float[2](0, 0.6);
 
 void main() {
     vec3 shallowColor = vec3(0.098, 0.890, 0.772);
@@ -42,10 +46,15 @@ void main() {
 
     color = mix(color, skyReflectionColor, fresnel);
 
-    float maxFogDistance = 4000;
+    float maxFogDistance = fogDistances[underwaterFlag];
     float cameraDistance = min(distance(cameraPosition, fragmentPosition), maxFogDistance);
-    float fogFactor = pow((cameraDistance / maxFogDistance), 3);
-    color = mix(color, vec3(1), fogFactor);
+    float fogFactorMinimum = fogFactorMinimums[underwaterFlag];
+    float fogFactor = clamp(pow((cameraDistance / maxFogDistance), 3), fogFactorMinimum, 1);
+    vec3 fogColors[2] = vec3[2](
+        vec3(1),
+        vec3(0.078, 0.447, 0.549)
+    );
+    color = mix(color, fogColors[underwaterFlag], fogFactor);
 
     outColor = vec4(color, 1.0);
 };

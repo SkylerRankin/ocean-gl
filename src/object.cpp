@@ -77,7 +77,7 @@ void Object::loadOBJ(const char* name) {
 	glVertexAttribPointer(vertexNormalLocation, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)(5 * sizeof(float)));
 
 	modelTransform = glm::mat4(1);
-	modelTransform = glm::scale(modelTransform, glm::vec3(20, 20, 20));
+	modelTransform = glm::scale(modelTransform, glm::vec3(1, 1, 1));
 	vertexShader.setUniformMat4("model", modelTransform);
 }
 
@@ -89,8 +89,11 @@ void Object::render(glm::mat4 view, glm::mat4 projection, float time) {
 	vertexShader.setUniformMat4("projection", projection);
 	vertexShader.setUniformFloat("time", time);
 
-	float rotation = fmodf(time, 360);
-	glm::mat4 model = glm::rotate(modelTransform, rotation, glm::vec3(0, 1, 0));
+	glm::vec3 wavePosition;
+	glm::vec3 waveNormal;
+	water->approximateWaveGeometry(position, time, wavePosition, waveNormal);
+
+	glm::mat4 model = glm::translate(modelTransform, glm::vec3(position.x, wavePosition.y, position.z));
 	vertexShader.setUniformMat4("model", model);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);

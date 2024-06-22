@@ -36,9 +36,10 @@ private:
 
 public:
 	void init(Engine* engine, GLuint skyboxTexture);
-	void render();
+	void render(float time, bool cameraUnderwater);
 	void setViewMatrix(glm::mat4 view);
 	void setProjectionMatrix(glm::mat4 projection);
+	void approximateWaveGeometry(glm::vec3 location, float time, glm::vec3& wavePosition, glm::vec3& waveNormal);
 private:
 	void setWaveParameters();
 };

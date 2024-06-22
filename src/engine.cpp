@@ -16,7 +16,7 @@ void Engine::setup(GLFWwindow* window) {
 
     cubemap.init();
     water.init(this, cubemap.texture);
-    testObject.loadOBJ("untitled");
+    testObject.loadOBJ("cube/cube");
 
     glClearColor(0.0f, 0.3f, 0.3f, 0.0f);
     glEnable(GL_DEPTH_TEST);
@@ -137,11 +137,16 @@ void Engine::renderFrame() {
         windowResizeCallback(width, height);
     }
 
+    glm::vec3 wavePosition;
+    glm::vec3 waveNormal;
+    water.approximateWaveGeometry(camera.position, currentTime, wavePosition, waveNormal);
+    bool cameraUnderwater = wavePosition.y > camera.position.y;
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     UI::setupFrame();
-    cubemap.render();
-    water.render();
+    cubemap.render(cameraUnderwater);
+    water.render(currentTime, cameraUnderwater);
     testObject.render(
         camera.getViewMatrix(),
         camera.getProjectionMatrix(windowSize.x / (float)windowSize.y),

@@ -15,7 +15,7 @@ private:
 
 	Water water;
 	Cubemap cubemap;
-	Object testObject;
+	Object testObject{&water};
 
 	bool hasWaveParameterUpdate = false;
 

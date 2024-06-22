@@ -83,3 +83,10 @@ void Shader::setUniformMat4(const std::string& name, glm::mat4 mat) {
     }
     glUniformMatrix4fv(attributeLocations.at(name), 1, GL_FALSE, glm::value_ptr(mat));
 }
+
+void Shader::setUniformInt(const std::string& name, int value) {
+    if (!attributeLocations.contains(name)) {
+        attributeLocations.emplace(name, glGetUniformLocation(program, name.c_str()));
+    }
+    glUniform1i(attributeLocations.at(name), value);
+}

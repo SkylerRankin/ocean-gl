@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <format>
 
 #include "water.h"
 #include "engine.h"
@@ -57,14 +58,14 @@ void Water::init(Engine* engine, GLuint skyboxTexture) {
     glVertexAttribPointer(vertexPositionLocation, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 }
 
-void Water::render() {
+void Water::render(float time, bool cameraUnderwater) {
     glBindVertexArray(vao);
     glUseProgram(program);
 
-    vertexShader.setUniformFloat("time", (float)glfwGetTime());
-    tessEvalShader.setUniformFloat("time", (float)glfwGetTime());
+    vertexShader.setUniformFloat("time", time);
+    tessEvalShader.setUniformFloat("time", time);
     fragmentShader.setUniformVec3("cameraPosition", engine->camera.position);
-    vertexShader.setUniformFloatv("waves", 40, waveParameters);
+    fragmentShader.setUniformInt("underwaterFlag", static_cast<int>(cameraUnderwater));
 
     glBindVertexArray(vao);
     glDrawArrays(GL_PATCHES, 0, 4 * patchTileSize.x * patchTileSize.y);
@@ -93,8 +94,6 @@ void Water::setWaveParameters() {
     srand(100);
 
     const float PI = 3.1415926535897932384626433832795;
-    float maxHeight = 0;
-    float minHeight = 0;
 
     for (int wave = 0; wave < waveCount; wave++) {
         float p = wave / (float)waveCount;
@@ -116,11 +115,74 @@ void Water::setWaveParameters() {
         waveParameters[wave * 4 + 1] = yDirection;
         waveParameters[wave * 4 + 2] = steepness;
         waveParameters[wave * 4 + 3] = wavelength;
+    }
+}
 
-        maxHeight += steepness / (2 * PI / wavelength);
+static glm::vec3 accumulateGerstnerWave(glm::vec3 vertexPosition, glm::vec2 direction, float steepness, float wavelength, float time, glm::vec3& tangent, glm::vec3& binormal) {
+    direction = normalize(direction);
+    const float PI = 3.1415926535897932384626433832795;
+
+    float speed = 3;
+    float k = 2 * PI / wavelength;
+    float c = sqrt(9.81 / k);
+    float f = k * (glm::dot(direction, glm::vec2(vertexPosition.x, vertexPosition.z)) - c * time * speed);
+    float a = steepness / k;
+
+    tangent += glm::vec3(
+        -direction.x * direction.x * steepness * sin(f),
+        direction.x * steepness * cos(f),
+        -direction.x * direction.y * steepness * sin(f)
+    );
+
+    binormal += glm::vec3(
+        -direction.x * direction.y * steepness * sin(f),
+        direction.y * steepness * cos(f),
+        -direction.y * direction.y * steepness * sin(f)
+    );
+
+    return glm::vec3(
+        direction.x * (a * cos(f)),
+        a * sin(f),
+        direction.y * (a * cos(f))
+    );
+}
+
+static void getSingleWaveGeometry(glm::vec3 location, float time, float* waveParameters, glm::vec3& wavePosition, glm::vec3& waveNormal) {
+    glm::vec3 position = glm::vec3(location.x, 0, location.z);
+    glm::vec3 tangent = glm::vec3(1.0, 0.0, 0.0);
+    glm::vec3 binormal = glm::vec3(0.0, 0.0, 1.0);
+
+    const int numWaves = 20;
+    for (int i = 0; i < numWaves * 4; i += 4) {
+        glm::vec2 direction = glm::vec2(waveParameters[i], waveParameters[i + 1]);
+        float steepness = waveParameters[i + 2];
+        float wavelength = waveParameters[i + 3];
+        position += accumulateGerstnerWave(location, direction, steepness, wavelength, time, tangent, binormal);
     }
 
-    minHeight = -maxHeight;
+    wavePosition = position;
+    waveNormal = normalize(cross(binormal, tangent));
+}
 
-    std::cout << "Wave height range: [" << minHeight << ", " << maxHeight << "]" << std::endl;
+/**
+    The displacement for each vertex in the water surface mesh is computed in the tesselation eval and vertex shaders, so it is not
+    quickly accessible on the CPU. This function uses the same wave function calculation to approximate the wave height at a given
+    point. This is an approximation because the wave function modifies all components of the input vector, not just the height, and is
+    not an invertable function. The more iterations used, the more accurate this approximation will be.
+*/
+void Water::approximateWaveGeometry(glm::vec3 desiredPosition, float time, glm::vec3& wavePosition, glm::vec3& waveNormal) {
+    const int iterations = 10;
+
+    glm::vec3 measurementLocation = glm::vec3(desiredPosition);
+    glm::vec3 measuredPosition;
+    glm::vec3 measuredNormal;
+
+    for (int i = 0; i < iterations; i++) {
+        getSingleWaveGeometry(measurementLocation, time, waveParameters, measuredPosition, measuredNormal);
+        glm::vec3 offset = measuredPosition - desiredPosition;
+        measurementLocation = measurementLocation - offset;
+    }
+
+    wavePosition = measuredPosition;
+    waveNormal = measuredNormal;
 }

@@ -60,12 +60,13 @@ void Cubemap::init() {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 }
 
-void Cubemap::render() {
+void Cubemap::render(bool cameraUnderwater) {
     glDepthMask(GL_FALSE);
     glBindVertexArray(vao);
     glUseProgram(program);
     vertexShader.setUniformMat4("view", view);
     vertexShader.setUniformMat4("projection", projection);
+    fragmentShader.setUniformInt("underwaterFlag", static_cast<int>(cameraUnderwater));
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
     glDrawArrays(GL_TRIANGLES, 0, 36);
