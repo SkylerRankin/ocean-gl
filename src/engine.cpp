@@ -150,7 +150,8 @@ void Engine::renderFrame() {
     testObject.render(
         camera.getViewMatrix(),
         camera.getProjectionMatrix(windowSize.x / (float)windowSize.y),
-        (float) glfwGetTime()
+        currentTime,
+        elapsedTime
     );
     UI::renderFrame();
     glfwSwapBuffers(window);

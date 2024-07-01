@@ -5,6 +5,17 @@
 #include "object.h"
 #include "loader.h"
 
+static const float PI = 3.1415926535897932384626433832795;
+
+static float angleBetweenVectors(glm::vec2 a, glm::vec2 b) {
+	return acos(glm::dot(a, b)) / (glm::length(a) * glm::length(b));
+}
+
+static float lag(float current, float target, float speed, float delta) {
+	float diff = target - current;
+	return current + diff * speed * delta;
+}
+
 void Object::loadOBJ(const char* name) {
 	OBJ::File objFile;
 	OBJ::parseOBJ(std::format("{0}.obj", name), objFile);
@@ -81,7 +92,7 @@ void Object::loadOBJ(const char* name) {
 	vertexShader.setUniformMat4("model", modelTransform);
 }
 
-void Object::render(glm::mat4 view, glm::mat4 projection, float time) {
+void Object::render(glm::mat4 view, glm::mat4 projection, float time, float elapsedTime) {
 	glBindVertexArray(vao);
 	glUseProgram(program);
 
@@ -93,8 +104,25 @@ void Object::render(glm::mat4 view, glm::mat4 projection, float time) {
 	glm::vec3 waveNormal;
 	water->approximateWaveGeometry(position, time, wavePosition, waveNormal);
 
+	float angleX = angleBetweenVectors(
+		glm::vec2(waveNormal.x, waveNormal.y),
+		glm::vec2(0, 1)
+	) * (waveNormal.x < 0 ? -1 : 1);
+	angleX = lag(rotationAngles.x, angleX, rotationLagSpeed, elapsedTime);
+
+	float angleZ = angleBetweenVectors(
+		glm::vec2(waveNormal.z, waveNormal.y),
+		glm::vec2(0, 1)
+	) * (waveNormal.z < 0 ? -1 : 1);
+	angleZ = lag(rotationAngles.z, angleZ, rotationLagSpeed, elapsedTime);
+
 	glm::mat4 model = glm::translate(modelTransform, glm::vec3(position.x, wavePosition.y, position.z));
+	model = glm::rotate(model, angleX, glm::vec3(1, 0, 0));
+	model = glm::rotate(model, angleZ, glm::vec3(0, 0, 1));
 	vertexShader.setUniformMat4("model", model);
+
+	rotationAngles.x = angleX;
+	rotationAngles.z = angleZ;
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glDrawArrays(GL_TRIANGLES, 0, renderVertices);
